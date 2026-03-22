@@ -1,0 +1,27 @@
+import cors from "cors";
+import express from "express";
+
+import get_menu from "./routes/get_menu.js";
+import post_menu from "./routes/post_menu.js";
+import put_menu from "./routes/put_menu.js";
+import patch_menu from "./routes/patch_menu.js";
+import delete_menu from "./routes/delete_menu.js";
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.use(get_menu);
+app.use(post_menu);
+app.use(put_menu);
+app.use(patch_menu);
+app.use(delete_menu);
+
+app.listen(3000, () => {
+    console.log("Server กำลังทำงานที่ http://localhost:3000");
+});
+
+app.get("/api/test", (req, res) => {
+    res.json({
+        status: "OK",
+    });
+});
