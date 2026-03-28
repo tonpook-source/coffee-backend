@@ -2,6 +2,7 @@ let menus = [];
 let toppings = [];
 let cart = [];
 let currentIndex = null;
+let currentCustomer = null;
 
 async function loadData() {
     try {
@@ -93,6 +94,66 @@ function renderCart() {
     }).join('');
 
     cartDiv.innerHTML += `<div class="text-2xl font-bold text-right mt-4 text-blue-600">รวม: ${total} ฿</div>`;
+}
+
+async function searchCustomer() {
+    const phone = document.getElementById('search-phone').value;
+    if(!phone) return;
+    
+    try {
+        const res = await fetch(`http://localhost:3000/api/customer/${phone}`);
+        const data = await res.json();
+        
+        if(data.status === 'success') {
+            currentCustomer = data.data; 
+            document.getElementById('customer-info').classList.remove('hidden');
+            document.getElementById('c-name').innerText = currentCustomer.name;
+        } else {
+            const newName = prompt("ไม่พบเบอร์นี้ กรุณาพิมพ์ชื่อลูกค้าเพื่อสมัครสมาชิกใหม่:");
+            if(newName) {
+                const regRes = await fetch('http://localhost:3000/api/customer', {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({name: newName, phone})
+                });
+                const regData = await regRes.json();
+                if(regRes.ok) {
+                    alert("สมัครสมาชิกสำเร็จ");
+                    currentCustomer = { customer_id: regData.customer_id, name: regData.name };
+                    document.getElementById('customer-info').classList.remove('hidden');
+                    document.getElementById('c-name').innerText = currentCustomer.name;
+                }
+            }
+        }
+    } catch(e) { 
+        alert("ติดต่อเซิร์ฟเวอร์ไม่ได้"); 
+    }
+}
+async function checkoutReal() {
+    if (cart.length === 0) return alert("ตะกร้าว่างเปล่า");
+    if (!currentCustomer) return alert("กรุณาค้นหาลูกค้าก่อนชำระเงิน");
+
+    try {
+        const res = await fetch('http://localhost:3000/api/orders', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ customer_id: currentCustomer.customer_id, items: cart }) 
+        });
+        const data = await res.json();
+        
+        if (res.ok) { 
+            alert(data.message); 
+            cart = []; 
+            renderCart(); 
+            currentCustomer = null; 
+            document.getElementById('customer-info').classList.add('hidden');
+            document.getElementById('search-phone').value = '';
+        } else { 
+            alert('เกิดข้อผิดพลาด: ' + data.error); 
+        }
+    } catch (error) { 
+        alert('ติดต่อเซิร์ฟเวอร์ไม่ได้'); 
+    }
 }
 
 loadData();
