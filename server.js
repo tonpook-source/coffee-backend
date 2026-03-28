@@ -7,6 +7,8 @@ import put_menu from "./routes/put_menu.js";
 import patch_menu from "./routes/patch_menu.js";
 import delete_menu from "./routes/delete_menu.js";
 import get_customer from "./routes/get_customer.js";
+import get_toppings from "./routes/get_toppings.js"
+
 
 const app = express();
 app.use(cors());
@@ -18,6 +20,7 @@ app.use(put_menu);
 app.use(patch_menu);
 app.use(delete_menu);
 app.use(get_customer);
+app.use(get_toppings);
 
 app.listen(3000, () => {
     console.log("Server กำลังทำงานที่ http://localhost:3000");
